@@ -102,65 +102,68 @@
     </div>
 
     <script>
-        const chatTrigger = document.getElementById('chat-trigger');
-        const chatModal = document.getElementById('chat-modal');
-        const closeChatBtn = document.getElementById('close-chat-btn');
-        const chatForm = document.getElementById('chat-form');
-        const userInput = document.getElementById('user-input');
-        const chatMessages = document.getElementById('chat-messages');
+const chatTrigger = document.getElementById('chat-trigger');
+const chatModal = document.getElementById('chat-modal');
+const closeChatBtn = document.getElementById('close-chat-btn');
+const chatForm = document.getElementById('chat-form');
+const userInput = document.getElementById('user-input');
+const chatMessages = document.getElementById('chat-messages');
 
-        // Show chat trigger on scroll
-        window.addEventListener('scroll', () => {
-            const scrollY = window.scrollY || window.pageYOffset;
-            const triggerOffset = window.innerHeight * 0.5; // Trigger at 50% of viewport height
-            if (scrollY > triggerOffset) {
-                chatTrigger.classList.remove('opacity-0');
-            } else {
-                chatTrigger.classList.add('opacity-0');
-            }
-        });
+// Your deployed backend URL (Render)
+const BACKEND_URL = "https://ai-career-advisor-wcuj.onrender.com/api/chat";
 
-        // Open chat modal
-        chatTrigger.addEventListener('click', () => {
-            chatModal.style.display = 'flex';
-        });
+// Show chat trigger on scroll
+window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY || window.pageYOffset;
+    const triggerOffset = window.innerHeight * 0.5;
+    if (scrollY > triggerOffset) chatTrigger.classList.remove('opacity-0');
+    else chatTrigger.classList.add('opacity-0');
+});
 
-        // Close chat modal
-        closeChatBtn.addEventListener('click', () => {
-            chatModal.style.display = 'none';
-        });
+// Open chat modal
+chatTrigger.addEventListener('click', () => {
+    chatModal.style.display = 'flex';
+});
 
-        // Handle form submission
-        chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const message = userInput.value.trim();
-            if (message) {
-                appendMessage(message, 'user');
-                userInput.value = '';
-                simulateAIResponse(message);
-            }
-        });
+// Close chat modal
+closeChatBtn.addEventListener('click', () => {
+    chatModal.style.display = 'none';
+});
 
-        function appendMessage(text, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
+// Handle form submission
+chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const message = userInput.value.trim();
+    if (message) {
+        appendMessage(message, 'user');
+        userInput.value = '';
+        sendMessage(message);
+    }
+});
 
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.classList.add('p-3', 'rounded-xl', 'max-w-[80%]', 'break-words');
-            
-            if (sender === 'user') {
-                bubbleDiv.classList.add('bg-purple-600', 'text-white', 'rounded-br-none');
-            } else {
-                bubbleDiv.classList.add('bg-gray-700', 'text-gray-200', 'rounded-tl-none');
-            }
+// Append message to chat
+function appendMessage(text, sender) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
 
-            bubbleDiv.textContent = text;
-            messageDiv.appendChild(bubbleDiv);
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
-        }
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.classList.add('p-3', 'rounded-xl', 'max-w-[80%]', 'break-words');
 
-        async function simulateAIResponse(userMessage) {
+    if (sender === 'user') {
+        bubbleDiv.classList.add('bg-purple-600', 'text-white', 'rounded-br-none');
+    } else {
+        bubbleDiv.classList.add('bg-gray-700', 'text-gray-200', 'rounded-tl-none');
+    }
+
+    bubbleDiv.textContent = text;
+    messageDiv.appendChild(bubbleDiv);
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Send message to backend
+async function sendMessage(message) {
+    // Typing indicator
     const typingIndicator = document.createElement('div');
     typingIndicator.id = 'typing-indicator';
     typingIndicator.classList.add('flex', 'justify-start');
@@ -176,11 +179,10 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     try {
-        const response = await fetch("http://localhost:4000/chat", {
-
+        const response = await fetch(BACKEND_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: userMessage })
+            body: JSON.stringify({ message })
         });
 
         const data = await response.json();
@@ -193,21 +195,11 @@
     }
 }
 
+// Initially hide the chat modal
+window.addEventListener('load', () => {
+    chatModal.style.display = 'none';
+});
+</script>
 
-            // --- IMPORTANT: This is where you would call a real AI API ---
-            // For now, we'll use a simple, delayed, rule-based response.
-            // Replace this with a fetch() call to your backend or an AI API.
-            setTimeout(() => {
-                const aiResponseText = getMockAIResponse(userMessage);
-                chatMessages.removeChild(typingIndicator);
-                appendMessage(aiResponseText, 'ai');
-            }, 1500); // Simulate a 1.5-second AI thinking time
-        
-
-        // Initially hide the chat modal
-        window.addEventListener('load', () => {
-            chatModal.style.display = 'none';
-        });
-    </script>
 </body>
 </html>

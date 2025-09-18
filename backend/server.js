@@ -1,36 +1,33 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Enable CORS for frontend
+app.use(cors());
 app.use(express.json());
 
-// Serve frontend (index.html, css, js)
+// ✅ Serve frontend files
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-// Gemini setup
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// Example API route
+app.post("/api/chat", async (req, res) => {
+  const { message } = req.body;
 
-// Chat endpoint
-app.post("/chat", async (req, res) => {
-  try {
-    const { message } = req.body;
-    const result = await model.generateContent(message);
-    res.json({ reply: result.response.text() });
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    res.status(500).json({ error: "Something went wrong!" });
-  }
+  // Mock response for now
+  res.json({ reply: `Career advice for: ${message}` });
 });
 
-// Start server
+// Catch-all to serve index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+});
+
 app.listen(PORT, () => {
-  console.log(`🚀 App running on port ${PORT}`);
+  console.log(`🚀 Gemini Career Advisor running at port ${PORT}`);
 });
