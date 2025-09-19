@@ -1,33 +1,50 @@
 import express from "express";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
-
-// Enable CORS for frontend
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); // replaces body-parser
 
-// ✅ Serve frontend files
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "../frontend")));
+const PORT = 4000;
 
-// Example API route
-app.post("/api/chat", async (req, res) => {
-  const { message } = req.body;
+// Load Gemini API
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-  // Mock response for now
-  res.json({ reply: `Career advice for: ${message}` });
+// Use Gemini Flash model
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+// Chat route
+app.post("/chat", async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message || message.trim() === "") {
+      return res.status(400).json({ reply: "⚠️ Please enter a message." });
+    }
+
+    const prompt = `
+    You are an AI Career Advisor chatbot. 
+    Always give clear, practical, and supportive career guidance. 
+    Do not answer non-career-related queries. Politely redirect users if needed.
+
+    User: ${message}
+    `;
+
+    const result = await model.generateContent(prompt);
+    const aiResponse = result.response.text();
+
+    res.json({ reply: aiResponse });
+  } catch (error) {
+    console.error("Gemini Error:", error);
+    res.status(500).json({ reply: "⚠️ Sorry, I’m having trouble right now." });
+  }
 });
 
-// Catch-all to serve index.html
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
-});
-
+// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Gemini Career Advisor running at port ${PORT}`);
+  console.log(⁠ 🚀 Gemini Career Advisor running at http://localhost:${PORT} ⁠);
 });
