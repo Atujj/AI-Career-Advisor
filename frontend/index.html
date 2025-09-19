@@ -1,4 +1,3 @@
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -102,68 +101,65 @@
     </div>
 
     <script>
-const chatTrigger = document.getElementById('chat-trigger');
-const chatModal = document.getElementById('chat-modal');
-const closeChatBtn = document.getElementById('close-chat-btn');
-const chatForm = document.getElementById('chat-form');
-const userInput = document.getElementById('user-input');
-const chatMessages = document.getElementById('chat-messages');
+        const chatTrigger = document.getElementById('chat-trigger');
+        const chatModal = document.getElementById('chat-modal');
+        const closeChatBtn = document.getElementById('close-chat-btn');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatMessages = document.getElementById('chat-messages');
 
-// Your deployed backend URL (Render)
-const BACKEND_URL = "https://ai-career-advisor-wcuj.onrender.com/api/chat";
+        // Show chat trigger on scroll
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY || window.pageYOffset;
+            const triggerOffset = window.innerHeight * 0.5; // Trigger at 50% of viewport height
+            if (scrollY > triggerOffset) {
+                chatTrigger.classList.remove('opacity-0');
+            } else {
+                chatTrigger.classList.add('opacity-0');
+            }
+        });
 
-// Show chat trigger on scroll
-window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY || window.pageYOffset;
-    const triggerOffset = window.innerHeight * 0.5;
-    if (scrollY > triggerOffset) chatTrigger.classList.remove('opacity-0');
-    else chatTrigger.classList.add('opacity-0');
-});
+        // Open chat modal
+        chatTrigger.addEventListener('click', () => {
+            chatModal.style.display = 'flex';
+        });
 
-// Open chat modal
-chatTrigger.addEventListener('click', () => {
-    chatModal.style.display = 'flex';
-});
+        // Close chat modal
+        closeChatBtn.addEventListener('click', () => {
+            chatModal.style.display = 'none';
+        });
 
-// Close chat modal
-closeChatBtn.addEventListener('click', () => {
-    chatModal.style.display = 'none';
-});
+        // Handle form submission
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (message) {
+                appendMessage(message, 'user');
+                userInput.value = '';
+                simulateAIResponse(message);
+            }
+        });
 
-// Handle form submission
-chatForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const message = userInput.value.trim();
-    if (message) {
-        appendMessage(message, 'user');
-        userInput.value = '';
-        sendMessage(message);
-    }
-});
+        function appendMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
 
-// Append message to chat
-function appendMessage(text, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.classList.add('p-3', 'rounded-xl', 'max-w-[80%]', 'break-words');
+            
+            if (sender === 'user') {
+                bubbleDiv.classList.add('bg-purple-600', 'text-white', 'rounded-br-none');
+            } else {
+                bubbleDiv.classList.add('bg-gray-700', 'text-gray-200', 'rounded-tl-none');
+            }
 
-    const bubbleDiv = document.createElement('div');
-    bubbleDiv.classList.add('p-3', 'rounded-xl', 'max-w-[80%]', 'break-words');
+            bubbleDiv.textContent = text;
+            messageDiv.appendChild(bubbleDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+        }
 
-    if (sender === 'user') {
-        bubbleDiv.classList.add('bg-purple-600', 'text-white', 'rounded-br-none');
-    } else {
-        bubbleDiv.classList.add('bg-gray-700', 'text-gray-200', 'rounded-tl-none');
-    }
-
-    bubbleDiv.textContent = text;
-    messageDiv.appendChild(bubbleDiv);
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-// Send message to backend
-async function sendMessage(message) {
-    // Typing indicator
+        async function simulateAIResponse(userMessage) {
     const typingIndicator = document.createElement('div');
     typingIndicator.id = 'typing-indicator';
     typingIndicator.classList.add('flex', 'justify-start');
@@ -179,10 +175,10 @@ async function sendMessage(message) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     try {
-        const response = await fetch(BACKEND_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message })
+        const response = await fetch("https://career-advisor-6xrq.onrender.com/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: userMessage })
         });
 
         const data = await response.json();
@@ -195,11 +191,13 @@ async function sendMessage(message) {
     }
 }
 
-// Initially hide the chat modal
-window.addEventListener('load', () => {
-    chatModal.style.display = 'none';
-});
-</script>
 
+        
+
+        // Initially hide the chat modal
+        window.addEventListener('load', () => {
+            chatModal.style.display = 'none';
+        });
+    </script>
 </body>
 </html>
